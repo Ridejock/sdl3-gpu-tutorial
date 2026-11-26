@@ -35,22 +35,24 @@ Linux needs the usual X11/Wayland and Vulkan headers before SDL will configure. 
 
 ## What's next
 
-Part 1 is this quad. Part 2 draws text next: a glyph is just that quad, it is satisfying to see your own words early, and score, lives, and a debug overlay all reuse it. After that, a classic vector Asteroids game on the same setup: a line-list ship, a fixed timestep, rocks that split, and sound through SDL3's own audio streams. Every later part is **planned**. They will be released gradually, one part at a time. There are no dates.
+Part 1 is this quad. Part 2 draws text next: a glyph is just that quad, it is satisfying to see your own words early, and score, lives, and a debug overlay all reuse it. Part 3 is palettes. The checkerboard and a 1-bit glyph are already indexed images, and a small color table is still how you get team colors, hit flashes, and quick programmer art. After that, a classic vector Asteroids game on the same setup: a line-list ship, a fixed timestep, rocks that split, and sound through SDL3's own audio streams. The first ship movement uses plain key checks so it flies quickly. A later part turns those checks into named actions (thrust, turn, fire, pause) bound to keys and gamepad buttons in a table, with rebinding and hot-plug. Every later part is **planned**. They will be released gradually, one part at a time. There are no dates.
 
 | Part | Title | Status |
 | --- | --- | --- |
 | 1 | Window, device, pipeline, textured quad | this repo |
 | 2 | Text: a font atlas | planned |
-| 3 | Vector ship as a line list | planned |
-| 4 | Fixed timestep, input, thrust, rotation, wrap | planned |
-| 5 | Dynamic vertex buffer | planned |
-| 6 | Bullets | planned |
-| 7 | Asteroids and splitting | planned |
-| 8 | Collisions | planned |
-| 9 | Score, lives, waves, UI | planned |
-| 10 | Audio with core audio streams | planned |
-| 11 | Juice: debris, shake, glow | planned |
-| 12 | Polish and a shareable build | planned |
+| 3 | Palettes | planned |
+| 4 | Vector ship as a line list | planned |
+| 5 | Fixed timestep, thrust, rotation, wrap (plain keys) | planned |
+| 6 | Dynamic vertex buffer | planned |
+| 7 | Bullets | planned |
+| 8 | Actions: keys and gamepad | planned |
+| 9 | Asteroids and splitting | planned |
+| 10 | Collisions | planned |
+| 11 | Score, lives, waves, UI | planned |
+| 12 | Audio with core audio streams | planned |
+| 13 | Juice: debris, shake, glow | planned |
+| 14 | Polish and a shareable build | planned |
 
 The per-part notes are in the [series outline](docs/series-outline.md).
 
