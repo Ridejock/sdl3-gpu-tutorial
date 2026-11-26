@@ -17,7 +17,7 @@ This is the same path a real engine takes. Each section links to the matching fi
 
 ## 0. Setup: let an AI assistant do the plumbing (recommended)
 
-Build setup (CMake, fetching SDL3, compiling shaders) is the least interesting part of graphics programming, and it's exactly where beginners lose a weekend. Our advice: **let an AI coding assistant generate the project scaffolding, and spend your energy on the SDL GPU code.** An AI speeds up setup, but you should still read every line it writes. If you can't explain a line, ask the assistant what it does before you keep it.
+Build setup (CMake, fetching SDL3, compiling shaders) is the least interesting part of graphics programming, and it's exactly where beginners lose a weekend. Our advice: **let an AI coding assistant generate the project scaffolding, and spend your energy on the SDL GPU code.** A free tier of a common assistant is enough for this. You do not need a paid plan. An AI speeds up setup, but you should still read every line it writes. If you can't explain a line, ask the assistant what it does before you keep it.
 
 This repository already contains a working setup (`CMakeLists.txt`, `CMakePresets.json`, and precompiled shaders). You can build it from the [README](../README.md), or paste the prompts below into an assistant and recreate it yourself. Either way, run the checklist before you trust the project.
 
@@ -829,7 +829,7 @@ Tip: `GUIDE_FRAMES=120 ./quad` quits after 120 frames, which is handy for CI smo
 
 ## 11. What's next: building Asteroids
 
-This guide is Part 1 of a series. Part 2 draws text next: a glyph is just the textured quad you already have, it is fun to see your own words early, and score, lives, and a debug overlay will reuse it. Part 3 is palettes. The checkerboard and a 1-bit glyph are already indexed images, and a color table is still how you recolor a sprite, flash a hit, or sketch placeholder art in code. After that we'll build a complete **classic vector Asteroids** on this exact setup: a line-list ship, thrust and screen wrap, bullets, splitting rocks, collisions, score/lives/UI, and audio through SDL3's core audio streams with a tiny custom mixer (no SDL_mixer). The first flying ship reads the keyboard directly, as a temporary step. A later part replaces that with named actions bound to keys and gamepad buttons, so rebinding and a hot-plugged pad stay in a data table. See [`series-outline.md`](series-outline.md) for the part-by-part plan.
+This guide is Part 1 of a series. Part 2 draws text next, step by step in [part-02-text.md](part-02-text.md): a glyph is just the textured quad you already have, it is fun to see your own words early, and score, lives, and a debug overlay will reuse it. Part 3 is palettes. The checkerboard and a 1-bit glyph are already indexed images, and a color table is still how you recolor a sprite, flash a hit, or sketch placeholder art in code. After that we'll build a complete **classic vector Asteroids** on this exact setup: a line-list ship, thrust and screen wrap, bullets, splitting rocks, collisions, score/lives/UI, and audio through SDL3's core audio streams with a tiny custom mixer (no SDL_mixer). The first flying ship reads the keyboard directly, as a temporary step. A later part replaces that with named actions bound to keys and gamepad buttons, so rebinding and a hot-plugged pad stay in a data table. See [`series-outline.md`](series-outline.md) for the part-by-part plan.
 
 ---
 

@@ -26,52 +26,79 @@ else()
     FetchContent_MakeAvailable(SDL3)
 endif()
 
-add_executable(quad src/main.cpp)
-target_link_libraries(quad PRIVATE SDL3::SDL3)
-if(MSVC)
-    target_compile_options(quad PRIVATE /W4 /permissive- /utf-8)
-else()
-    target_compile_options(quad PRIVATE -Wall -Wextra -Wpedantic)
-endif()
+function(sdl3_gpu_apply_warnings target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W4 /permissive- /utf-8)
+    else()
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+endfunction()
 
-# Shaders land in <exe dir>/shaders, which is where src/main.cpp loads them from.
+# Copy or compile one shader directory into <exe>/shaders.
+# Remaining args are pairs: shader-name stage  (Text.vert vertex Text.frag fragment)
+function(sdl3_gpu_shaders target shader_dir)
+    set(shader_out "$<TARGET_FILE_DIR:${target}>/shaders")
+    if(COMPILE_SHADERS AND SHADERCROSS)
+        set(pairs ${ARGN})
+        while(pairs)
+            list(POP_FRONT pairs name stage)
+            foreach(fmt_pair "SPIRV;spv" "DXIL;dxil" "MSL;msl")
+                list(GET fmt_pair 0 fmt)
+                list(GET fmt_pair 1 ext)
+                add_custom_command(TARGET ${target} POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E make_directory "${shader_out}"
+                    COMMAND "${SHADERCROSS}" "${shader_dir}/${name}.hlsl"
+                            -s HLSL -d ${fmt} -t ${stage} -e main -o "${shader_out}/${name}.${ext}"
+                    VERBATIM)
+            endforeach()
+        endwhile()
+    else()
+        file(GLOB prebuilt CONFIGURE_DEPENDS
+            "${shader_dir}/*.spv" "${shader_dir}/*.dxil" "${shader_dir}/*.msl")
+        if(prebuilt)
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${shader_out}"
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${prebuilt} "${shader_out}"
+                VERBATIM)
+        else()
+            message(WARNING
+                "No precompiled shaders in ${shader_dir} and shadercross is not available.")
+        endif()
+    endif()
+endfunction()
+
 find_program(SHADERCROSS shadercross)
-set(SHADER_OUT "$<TARGET_FILE_DIR:quad>/shaders")
-
 if(COMPILE_SHADERS AND SHADERCROSS)
     message(STATUS "COMPILE_SHADERS: compiling HLSL with ${SHADERCROSS}")
-    foreach(stage_pair "Quad.vert;vertex" "Quad.frag;fragment")
-        list(GET stage_pair 0 name)
-        list(GET stage_pair 1 stage)
-        foreach(fmt_pair "SPIRV;spv" "DXIL;dxil" "MSL;msl")
-            list(GET fmt_pair 0 fmt)
-            list(GET fmt_pair 1 ext)
-            add_custom_command(TARGET quad POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory "${SHADER_OUT}"
-                COMMAND "${SHADERCROSS}" "${CMAKE_SOURCE_DIR}/shaders/${name}.hlsl"
-                        -s HLSL -d ${fmt} -t ${stage} -e main -o "${SHADER_OUT}/${name}.${ext}"
-                VERBATIM)
-        endforeach()
-    endforeach()
+elseif(COMPILE_SHADERS)
+    message(STATUS "COMPILE_SHADERS is ON but shadercross was not found; copying precompiled shaders")
 else()
-    if(COMPILE_SHADERS)
-        message(STATUS "COMPILE_SHADERS is ON but shadercross was not found; copying precompiled shaders from shaders/")
-    else()
-        message(STATUS "COMPILE_SHADERS is OFF; copying precompiled shaders from shaders/")
-    endif()
-    file(GLOB prebuilt CONFIGURE_DEPENDS
-        "${CMAKE_SOURCE_DIR}/shaders/*.spv"
-        "${CMAKE_SOURCE_DIR}/shaders/*.dxil"
-        "${CMAKE_SOURCE_DIR}/shaders/*.msl")
-    if(prebuilt)
-        add_custom_command(TARGET quad POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${SHADER_OUT}"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${prebuilt} "${SHADER_OUT}"
-            VERBATIM)
-    else()
-        message(WARNING
-            "No precompiled shaders in shaders/ (.spv, .dxil, .msl) and shadercross is not available. "
-            "The sample builds, but it has nothing to draw until those files exist. "
-            "Install SDL_shadercross and reconfigure, or see docs/guide.md.")
-    endif()
+    message(STATUS "COMPILE_SHADERS is OFF; copying precompiled shaders")
 endif()
+
+add_executable(quad src/main.cpp)
+target_link_libraries(quad PRIVATE SDL3::SDL3)
+sdl3_gpu_apply_warnings(quad)
+sdl3_gpu_shaders(quad "${CMAKE_SOURCE_DIR}/shaders" Quad.vert vertex Quad.frag fragment)
+
+# Part 2. The quad target above is unchanged.
+add_executable(text
+    parts/02-text/main.cpp
+    parts/02-text/third_party/stb_truetype.c)
+target_include_directories(text PRIVATE
+    parts/02-text
+    parts/02-text/third_party)
+target_link_libraries(text PRIVATE SDL3::SDL3)
+sdl3_gpu_apply_warnings(text)
+if(MSVC)
+    set_source_files_properties(parts/02-text/third_party/stb_truetype.c PROPERTIES COMPILE_OPTIONS "/w")
+else()
+    set_source_files_properties(parts/02-text/third_party/stb_truetype.c PROPERTIES COMPILE_OPTIONS "-w")
+endif()
+sdl3_gpu_shaders(text "${CMAKE_SOURCE_DIR}/parts/02-text/shaders" Text.vert vertex Text.frag fragment)
+add_custom_command(TARGET text POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:text>/fonts"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/parts/02-text/fonts"
+            "$<TARGET_FILE_DIR:text>/fonts"
+    VERBATIM)
