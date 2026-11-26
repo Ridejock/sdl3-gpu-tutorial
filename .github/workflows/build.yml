@@ -1,0 +1,77 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu
+            os: ubuntu-latest
+            smoke: true
+          - name: Windows (MSVC)
+            os: windows-latest
+            smoke: false
+          - name: macOS
+            os: macos-latest
+            smoke: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake pkg-config \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+            libxi-dev libxss-dev libxtst-dev libxkbcommon-dev \
+            libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libdbus-1-dev libudev-dev libwayland-dev libdecor-0-dev \
+            libvulkan-dev mesa-vulkan-drivers vulkan-tools vulkan-validationlayers \
+            xvfb libibus-1.0-dev
+
+      - name: Configure
+        run: cmake --preset release
+
+      - name: Build
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cmake --build --preset release --config Release
+          else
+            cmake --build --preset release
+          fi
+
+      - name: Smoke test with Lavapipe
+        if: matrix.smoke
+        run: |
+          set -euo pipefail
+          icd=""
+          if [ -f /usr/share/vulkan/icd.d/lvp_icd.x86_64.json ]; then
+            icd=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+          elif [ -f /usr/share/vulkan/icd.d/lvp_icd.json ]; then
+            icd=/usr/share/vulkan/icd.d/lvp_icd.json
+          else
+            echo "Lavapipe ICD not found" >&2
+            ls -l /usr/share/vulkan/icd.d || true
+            exit 1
+          fi
+          # xvfb-run's own env wrapper does not forward a command's environment
+          # the way a plain `env` prefix does, so export before launching.
+          export SDL_VIDEODRIVER=x11
+          export VK_DRIVER_FILES="$icd"
+          export GUIDE_FRAMES=3
+          xvfb-run -a -s "-screen 0 1280x720x24" ./out/release/quad
