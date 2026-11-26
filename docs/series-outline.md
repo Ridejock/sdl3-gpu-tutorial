@@ -62,6 +62,23 @@ constexpr uint8_t kGlyphA[8] = {
 
 The pixels are original, so the font is license-free.
 
+The big reason for the graph paper was shading, done in thirds. Each square was one of four levels: empty, 1/3, 2/3, or full. That is hand-made anti-aliasing. Shading every square, then turning each row into hex by hand, is slow for the person drawing the font and for the person reading it. The 2-bit numbers themselves are cheap for the computer: an 8-pixel row is one 16-bit value (`0xHHHH`), and the left square is the top two bits. The sample's HEX font stays the 1-bit form above. A shaded row expands into the same R8 atlas: take each 2-bit level and store `level * 85`, which is 0, 85, 170, or 255.
+
+```cpp
+// Shaded "A", still old-school. Left square is the top two bits.
+// . empty   : 1/3   + 2/3   # full
+constexpr uint16_t kShadedA[8] = {
+    0x0690, // ..:++:..
+    0x1EB4, // .:#++#:.
+    0x6C39, // :+#..#+:
+    0xB00E, // +#....#+
+    0xFFFF, // ########
+    0xB00E, // +#....#+
+    0xB00E, // +#....#+
+    0x0000, // ........
+};
+```
+
 Bake whichever source you picked into **one texture atlas** (a single image of glyphs). Keep a tiny table next to it: for each character, the rectangle inside the atlas, how far the next character should start (the advance), and where the glyph sits relative to the baseline (the bearing).
 
 **Onto the GPU.** Upload that atlas the same way as the checkerboard: CPU pixels, a transfer buffer, a copy pass, a GPU texture. Then draw one textured quad per glyph with the pipeline you already have. A string is a row of those quads.

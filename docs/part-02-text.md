@@ -317,9 +317,34 @@ Years ago the author would take graph paper to a coffee shop, map a font pixel b
 },
 ```
 
-Read a comment left to right and you are looking at the graph paper. `#` in the comment is a filled square. ASCII 32 through 126 are in that table, in order. The pixels are original, so this font is license-free.
+Read a comment left to right and you are looking at the graph paper. `#` in the comment is a filled square. ASCII 32 through 126 are in that table, in order. The pixels are original, so this font is license-free. The running sample stays this 1-bit font, so **T** still flips between TTF and these chunky letters.
 
-**Where:** `BakeHandAtlas` expands those bits into the same kind of R8 atlas as the TTF bake. A 1 becomes 255, a 0 stays 0. The glyphs are scaled by 4 so each font pixel is a 4×4 block on screen. Advance is `8 * 4`. There is no kerning. Upload with the same `UploadR8`.
+The big reason for the graph paper was shading, done in thirds. Each square was one of four levels: empty, 1/3, 2/3, or full. That is hand-made anti-aliasing, and it is still the old-school path, not the modern standard. What takes the time is the person: shading every square, then converting each row to hex by hand. The 2-bit numbers are cheap for the computer. An 8-pixel row is one 16-bit value (`0xHHHH`). The left square is the top two bits. `.` is empty, `:` is 1/3, `+` is 2/3, `#` is full.
+
+```cpp
+// Shaded "A". Still old-school. Not what the T key draws.
+constexpr uint16_t kShadedA[8] = {
+    0x0690, // ..:++:..
+    0x1EB4, // .:#++#:.
+    0x6C39, // :+#..#+:
+    0xB00E, // +#....#+
+    0xFFFF, // ########
+    0xB00E, // +#....#+
+    0xB00E, // +#....#+
+    0x0000, // ........
+};
+```
+
+Expand a row into the same R8 atlas. Each level times 85 is the alpha byte: 0, 85, 170, or 255.
+
+```cpp
+for (int x = 0; x < 8; ++x) {
+    const int level = (row >> (14 - 2 * x)) & 0x3;
+    pixels[x] = static_cast<Uint8>(level * 85);
+}
+```
+
+**Where:** `BakeHandAtlas` expands the 1-bit rows into the same kind of R8 atlas as the TTF bake. A 1 becomes 255, a 0 stays 0. The glyphs are scaled by 4 so each font pixel is a 4×4 block on screen. Advance is `8 * 4`. There is no kerning. Upload with the same `UploadR8`.
 
 **Where:** the frame loop, edge-detect the T key and pick an atlas.
 
