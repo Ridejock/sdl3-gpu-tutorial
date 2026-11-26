@@ -35,7 +35,7 @@ Linux needs the usual X11/Wayland and Vulkan headers before SDL will configure. 
 
 ## What's next
 
-Part 0 is this quad. The follow-up is a classic vector Asteroids game on the same setup: line-list drawing, a fixed timestep, rocks that split, and sound through SDL3's own audio streams. Every later part is **planned**. There are no dates.
+Part 0 is this quad. The follow-up is a classic vector Asteroids game on the same setup: line-list drawing, a fixed timestep, rocks that split, a whole part on drawing text (fonts are the hard bit), and sound through SDL3's own audio streams. Every later part is **planned**. They will be released gradually, one part at a time. There are no dates.
 
 | Part | Title | Status |
 | --- | --- | --- |
@@ -46,10 +46,11 @@ Part 0 is this quad. The follow-up is a classic vector Asteroids game on the sam
 | 4 | Bullets | planned |
 | 5 | Asteroids and splitting | planned |
 | 6 | Collisions | planned |
-| 7 | Score, lives, waves, UI | planned |
-| 8 | Audio with core audio streams | planned |
-| 9 | Juice: debris, shake, glow | planned |
-| 10 | Polish and a shareable build | planned |
+| 7 | Text: a font atlas | planned |
+| 8 | Score, lives, waves, UI | planned |
+| 9 | Audio with core audio streams | planned |
+| 10 | Juice: debris, shake, glow | planned |
+| 11 | Polish and a shareable build | planned |
 
 The per-part notes are in the [series outline](docs/series-outline.md).
 

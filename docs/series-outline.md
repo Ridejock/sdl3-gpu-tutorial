@@ -1,6 +1,7 @@
 # Series outline: Asteroids on SDL3 GPU
 
-**Part 0** is the intro guide ([guide.md](guide.md)): window → device → pipeline → textured quad. The parts below are planned. There is no schedule yet.
+**Part 0** is the intro guide ([guide.md](guide.md)): window → device → pipeline → textured quad. The parts below are planned. They will be released gradually, one part at a time. There are no dates.
+
 The series then builds a complete classic vector Asteroids on top of that exact setup. Everything stays **standalone SDL3**: plain C++20, SDL3 core only, and no engine. Audio uses SDL3 core audio streams with a tiny custom mixer, **never SDL_mixer**.
 
 Reference (for the author, optional for readers): Ervin's public [Ridejock/Asteroids](https://github.com/Ridejock/Asteroids), which is built on the Emerald engine. Useful files to cross-check behavior: `src/Shared/Ship.cpp`, `Asteroid.cpp`, `Bullet.h`, `Playfield.h`, `Saucer.cpp`, `ParticleEffects.cpp`, `HighScores.cpp`. The tutorial code is written fresh and doesn't depend on Emerald.
@@ -15,10 +16,34 @@ Each part ends with a runnable build, a short "what changed" diff, and a 1-post 
 | 4 | **Bullets** | Fixed-size pool (`std::array` + alive flags), lifetime, fire cooldown, wrap | Ship shoots |
 | 5 | **Asteroids + splitting** | Data table for sizes (large → 2 medium → 2 small: radius, speed, score), seeded RNG (`std::mt19937`), jagged polygons generated once per rock | Rocks drift and split when hit |
 | 6 | **Collisions** | Circle-vs-circle broad checks, wrap-aware distance, ship death + respawn invulnerability blink | Bullets break rocks; rocks kill the ship |
-| 7 | **Score, lives, waves, UI** | A tiny vector font (segment table → lines, same pipeline), game state machine (title / playing / game over), wave spawner | HUD, waves, title + game over screens |
-| 8 | **Audio: core audio streams + tiny mixer** | `SDL_OpenAudioDeviceStream`, a callback that mixes N voices (float, clamp), procedurally generated SFX (thrust noise, fire blip, explosion), **no SDL_mixer** | Classic beeps and booms |
-| 9 | **Juice** | Particle debris as lines, screen shake (camera offset uniform), additive blend glow pipeline | It *feels* like Asteroids |
-| 10 | **Polish + ship it** | Saucers (optional), high-score file via `SDL_GetPrefPath`, packaging a release zip (exe + shaders folder) | A shareable build |
+| 7 | **Text: a font atlas** | Bake glyphs with stb_truetype or a bitmap font, upload one atlas, draw glyph quads with alpha blend and pixel snapping. See below. | The words "SCORE" and a life count, crisp on the HUD |
+| 8 | **Score, lives, waves, UI** | Game state machine (title / playing / game over), wave spawner, HUD strings drawn with the Part 7 atlas | HUD, waves, title + game over screens |
+| 9 | **Audio: core audio streams + tiny mixer** | `SDL_OpenAudioDeviceStream`, a callback that mixes N voices (float, clamp), procedurally generated SFX (thrust noise, fire blip, explosion), **no SDL_mixer** | Classic beeps and booms |
+| 10 | **Juice** | Particle debris as lines, screen shake (camera offset uniform), additive blend glow pipeline | It *feels* like Asteroids |
+| 11 | **Polish + ship it** | Saucers (optional), high-score file via `SDL_GetPrefPath`, packaging a release zip (exe + shaders folder) | A shareable build |
+
+## Part 7: drawing text
+
+Score and lives are the first thing in the game that needs words, and fonts are where a lot of beginners get stuck. This part is only about drawing text. Part 8 uses it for the HUD, the title, and game over. Nothing here is a new kind of draw. A glyph is the same textured quad as Part 0.
+
+**Where the glyphs come from.** Two fine choices:
+
+- [stb_truetype](https://github.com/nothings/stb/blob/master/stb_truetype.h) is one public-domain header. You hand it a TTF, and it rasterizes the characters you ask for.
+- A bitmap font is a picture of the alphabet plus a small table of widths. You can draw it yourself. There is no font parser at all.
+
+Either way, bake the characters you need into **one texture atlas** (a single image of glyphs). Keep a tiny table next to it: for each character, the rectangle inside the atlas, how far the next character should start (the advance), and where the glyph sits relative to the baseline (the bearing).
+
+**Onto the GPU.** Upload that atlas the same way as the checkerboard: CPU pixels, a transfer buffer, a copy pass, a GPU texture. Then draw one textured quad per glyph with the pipeline you already have. A string is a row of those quads.
+
+**Alpha blending.** Turn it on for the glyph pipeline. The edge of a glyph fades out instead of drawing a hard rectangle, which is what makes it look like text.
+
+**Left to right.** Start a pen at the origin. Place a glyph, then move the pen by that glyph's advance. Kerning is a small extra nudge between some pairs (an "A" and a "V" want to sit closer than their advances say). stb_truetype can give you that nudge. A bitmap font can skip kerning at first and still look fine.
+
+**Keep it crisp.** Snap the pen to whole pixels before you draw. If a HUD glyph sits on a fractional pixel it shimmers as it moves. HUD text is snapped. Text that lives in the world can stay smooth.
+
+**SDL_ttf is a real option, and we don't use it here.** SDL_ttf will rasterize for you, and it is a good library. The atlas is a few dozen lines on top of the upload and the draw you already know, it links nothing extra, and you can see every byte that reaches the GPU. Once that path is obvious, SDL_ttf is easy to pick up. The sample stays on SDL3 core.
+
+**Fonts you can ship.** Only use a font you are allowed to redistribute. That means an [OFL](https://openfontlicense.org/) font (SIL Open Font License) or a CC0 font, with its license file kept next to the font. Don't drop in a font from the operating system, and don't use a commercial face.
 
 ## Running rules for the series
 
@@ -26,10 +51,9 @@ Each part ends with a runnable build, a short "what changed" diff, and a 1-post 
 - One pipeline per primitive and blend combo. Few draws, big buffers.
 - Every API name is checked against wiki.libsdl.org/SDL3 before publishing.
 - Every part compiles with warnings on and runs on Vulkan, D3D12, and Metal (shaders via shadercross).
-- No SDL satellite libraries (no SDL_mixer, SDL_image, or SDL_ttf), so readers learn the core API.
+- No SDL satellite libraries in the sample (no SDL_mixer, SDL_image, or SDL_ttf). Text is the atlas from Part 7, not SDL_ttf. Audio is the tiny mixer, not SDL_mixer. SDL_ttf is named in Part 7 so readers know the alternative.
 
 ## Open questions
 
-- Cadence: one part per week (fits the Saturday update rhythm), or batches?
 - Host: the code for each part as a tag in a small public repo, or as gists?
-- Include the saucer in Part 10, or leave it as an "exercise" post?
+- Include the saucer in Part 11, or leave it as an "exercise" post?
