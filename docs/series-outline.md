@@ -62,7 +62,17 @@ constexpr uint8_t kGlyphA[8] = {
 
 The pixels are original, so the font is license-free.
 
-The big reason for the graph paper was shading, done in thirds. Each square was one of four levels: empty, 1/3, 2/3, or full. That is hand-made anti-aliasing. Shading every square, then turning each row into hex by hand, is slow for the person drawing the font and for the person reading it. The 2-bit numbers themselves are cheap for the computer: an 8-pixel row is one 16-bit value (`0xHHHH`), and the left square is the top two bits. The sample's HEX font stays the 1-bit form above. A shaded row expands into the same R8 atlas: take each 2-bit level and store `level * 85`, which is 0, 85, 170, or 255.
+The big reason for the graph paper was shading, done in thirds. Each square was one of four levels: empty, 1/3, 2/3, or full. That is hand-made anti-aliasing. The author spent hours on each font doing the conversion by hand. One row, left square first:
+
+```text
+shades    ..:++:..
+levels    0  0  1  2  2  1  0  0
+bits      00 00 01 10 10 01 00 00
+nibbles   0000 0110 1001 0000
+hex       0x0690
+```
+
+`.` `:` `+` `#` are levels 0, 1, 2, 3. The 2-bit numbers are cheap for the computer. The sample's HEX font stays the 1-bit form above. A shaded row expands into the same R8 atlas: take each 2-bit level and store `level * 85`, which is 0, 85, 170, or 255.
 
 ```cpp
 // Shaded "A", still old-school. Left square is the top two bits.

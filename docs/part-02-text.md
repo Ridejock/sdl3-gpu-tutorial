@@ -319,7 +319,17 @@ Years ago the author would take graph paper to a coffee shop, map a font pixel b
 
 Read a comment left to right and you are looking at the graph paper. `#` in the comment is a filled square. ASCII 32 through 126 are in that table, in order. The pixels are original, so this font is license-free. The running sample stays this 1-bit font, so **T** still flips between TTF and these chunky letters.
 
-The big reason for the graph paper was shading, done in thirds. Each square was one of four levels: empty, 1/3, 2/3, or full. That is hand-made anti-aliasing, and it is still the old-school path, not the modern standard. What takes the time is the person: shading every square, then converting each row to hex by hand. The 2-bit numbers are cheap for the computer. An 8-pixel row is one 16-bit value (`0xHHHH`). The left square is the top two bits. `.` is empty, `:` is 1/3, `+` is 2/3, `#` is full.
+The big reason for the graph paper was shading, done in thirds. Each square was one of four levels: empty, 1/3, 2/3, or full. That is hand-made anti-aliasing, and it is still the old-school path, not the modern standard. The author spent hours on each font doing this by hand. One row of the shaded **A** below, left square first:
+
+```text
+shades    ..:++:..
+levels    0  0  1  2  2  1  0  0
+bits      00 00 01 10 10 01 00 00
+nibbles   0000 0110 1001 0000
+hex       0x0690
+```
+
+`.` is 0, `:` is 1, `+` is 2, `#` is 3. Group the bits by fours and you can read the hex. The 2-bit numbers are cheap for the computer. What is slow is the person shading the squares and writing the hex.
 
 ```cpp
 // Shaded "A". Still old-school. Not what the T key draws.
