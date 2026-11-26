@@ -1,0 +1,29 @@
+# CMake preset build trees and other local build directories
+/out/
+/build/
+/cmake-build-*/
+
+# CMake scratch files, if a build is configured in-source
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Editors and OS
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Stray compiler output
+*.o
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.idb
