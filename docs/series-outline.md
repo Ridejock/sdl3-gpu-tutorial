@@ -1,6 +1,6 @@
 # Series outline: Asteroids on SDL3 GPU
 
-**Part 0** is the intro guide ([guide.md](guide.md)): window → device → pipeline → textured quad. The parts below are planned. They will be released gradually, one part at a time. There are no dates.
+**Part 1** is this guide ([guide.md](guide.md)): window → device → pipeline → textured quad. **Part 2** is text, immediately after, because a glyph is just that quad. The parts after Part 1 are planned. They will be released gradually, one part at a time. There are no dates.
 
 The series then builds a complete classic vector Asteroids on top of that exact setup. Everything stays **standalone SDL3**: plain C++20, SDL3 core only, and no engine. Audio uses SDL3 core audio streams with a tiny custom mixer, **never SDL_mixer**.
 
@@ -10,23 +10,24 @@ Each part ends with a runnable build, a short "what changed" diff, and a 1-post 
 
 | # | Part | New SDL GPU / C++ ideas | Result on screen |
 | --- | --- | --- | --- |
-| 1 | **Vector ship as a line list** | `SDL_GPU_PRIMITIVETYPE_LINELIST` pipeline, colour-only shader (no texture), shape data as a `constexpr std::array` of points, one model→clip transform pushed as a uniform | A white triangle ship in the centre |
-| 2 | **Fixed timestep, input, thrust, rotation, wrap** | `SDL_GetTicksNS` fixed 120 Hz update + interpolation, `SDL_GetKeyboardState` vs events, a key-binding table (data, not `if` chains), velocity/drag, screen wrap with `std::fmod` | Ship flies, rotates, wraps around the edges |
-| 3 | **Dynamic vertex buffer** | Rebuild a per-frame line buffer: transfer buffer mapped with **`cycle = true`**, a single upload per frame, one draw call for all lines | Many shapes drawn with one buffer/draw |
-| 4 | **Bullets** | Fixed-size pool (`std::array` + alive flags), lifetime, fire cooldown, wrap | Ship shoots |
-| 5 | **Asteroids + splitting** | Data table for sizes (large → 2 medium → 2 small: radius, speed, score), seeded RNG (`std::mt19937`), jagged polygons generated once per rock | Rocks drift and split when hit |
-| 6 | **Collisions** | Circle-vs-circle broad checks, wrap-aware distance, ship death + respawn invulnerability blink | Bullets break rocks; rocks kill the ship |
-| 7 | **Text: a font atlas** | Recommended: bake glyphs with stb_truetype. Optional old-school path: a hand-drawn bitmap font. Upload one atlas, draw glyph quads with alpha blend and pixel snapping. See below. | The words "SCORE" and a life count, crisp on the HUD |
-| 8 | **Score, lives, waves, UI** | Game state machine (title / playing / game over), wave spawner, HUD strings drawn with the Part 7 atlas | HUD, waves, title + game over screens |
-| 9 | **Audio: core audio streams + tiny mixer** | `SDL_OpenAudioDeviceStream`, a callback that mixes N voices (float, clamp), procedurally generated SFX (thrust noise, fire blip, explosion), **no SDL_mixer** | Classic beeps and booms |
-| 10 | **Juice** | Particle debris as lines, screen shake (camera offset uniform), additive blend glow pipeline | It *feels* like Asteroids |
-| 11 | **Polish + ship it** | Saucers (optional), high-score file via `SDL_GetPrefPath`, packaging a release zip (exe + shaders folder) | A shareable build |
+| 1 | **Textured quad** | This guide: window, GPU device, pipeline, one spinning checkerboard quad | A spinning checkerboard quad |
+| 2 | **Text: a font atlas** | A glyph is that same quad. Recommended: bake glyphs with stb_truetype. Optional old-school path: a hand-drawn bitmap font. Upload one atlas, draw glyph quads with alpha blend and pixel snapping. See below. | Your own words on screen |
+| 3 | **Vector ship as a line list** | `SDL_GPU_PRIMITIVETYPE_LINELIST` pipeline, colour-only shader (no texture), shape data as a `constexpr std::array` of points, one model→clip transform pushed as a uniform | A white triangle ship in the centre |
+| 4 | **Fixed timestep, input, thrust, rotation, wrap** | `SDL_GetTicksNS` fixed 120 Hz update + interpolation, `SDL_GetKeyboardState` vs events, a key-binding table (data, not `if` chains), velocity/drag, screen wrap with `std::fmod` | Ship flies, rotates, wraps around the edges |
+| 5 | **Dynamic vertex buffer** | Rebuild a per-frame line buffer: transfer buffer mapped with **`cycle = true`**, a single upload per frame, one draw call for all lines | Many shapes drawn with one buffer/draw |
+| 6 | **Bullets** | Fixed-size pool (`std::array` + alive flags), lifetime, fire cooldown, wrap | Ship shoots |
+| 7 | **Asteroids + splitting** | Data table for sizes (large → 2 medium → 2 small: radius, speed, score), seeded RNG (`std::mt19937`), jagged polygons generated once per rock | Rocks drift and split when hit |
+| 8 | **Collisions** | Circle-vs-circle broad checks, wrap-aware distance, ship death + respawn invulnerability blink | Bullets break rocks; rocks kill the ship |
+| 9 | **Score, lives, waves, UI** | Game state machine (title / playing / game over), wave spawner, HUD strings drawn with the Part 2 atlas | HUD, waves, title + game over screens |
+| 10 | **Audio: core audio streams + tiny mixer** | `SDL_OpenAudioDeviceStream`, a callback that mixes N voices (float, clamp), procedurally generated SFX (thrust noise, fire blip, explosion), **no SDL_mixer** | Classic beeps and booms |
+| 11 | **Juice** | Particle debris as lines, screen shake (camera offset uniform), additive blend glow pipeline | It *feels* like Asteroids |
+| 12 | **Polish + ship it** | Saucers (optional), high-score file via `SDL_GetPrefPath`, packaging a release zip (exe + shaders folder) | A shareable build |
 
-## Part 7: drawing text
+## Part 2: drawing text
 
-Score and lives are the first thing in the game that needs words, and fonts are where a lot of beginners get stuck. This part is only about drawing text. Part 8 uses it for the HUD, the title, and game over. Nothing here is a new kind of draw. A glyph is the same textured quad as Part 0.
+A glyph is just a textured quad, the same one from Part 1. Beginners love seeing their own text early, and every later part reuses this: score, lives, and a debug overlay. This part is only about drawing text.
 
-**Where the glyphs come from.** The recommended path is [stb_truetype](https://github.com/nothings/stb/blob/master/stb_truetype.h), one public-domain header. You hand it an OFL or CC0 TTF, and it rasterizes the characters you ask for. That is the modern standard for this series, and it is the path Part 8 builds on.
+**Where the glyphs come from.** The recommended path is [stb_truetype](https://github.com/nothings/stb/blob/master/stb_truetype.h), one public-domain header. You hand it an OFL or CC0 TTF, and it rasterizes the characters you ask for. That is the modern standard for this series, and it is what Part 9 and the later HUD text build on.
 
 ### Old-school option: hand-drawn bitmap font
 
@@ -77,9 +78,9 @@ Bake whichever source you picked into **one texture atlas** (a single image of g
 - One pipeline per primitive and blend combo. Few draws, big buffers.
 - Every API name is checked against wiki.libsdl.org/SDL3 before publishing.
 - Every part compiles with warnings on and runs on Vulkan, D3D12, and Metal (shaders via shadercross).
-- No SDL satellite libraries in the sample (no SDL_mixer, SDL_image, or SDL_ttf). Text is the atlas from Part 7, not SDL_ttf. Audio is the tiny mixer, not SDL_mixer. SDL_ttf is named in Part 7 so readers know the alternative.
+- No SDL satellite libraries in the sample (no SDL_mixer, SDL_image, or SDL_ttf). Text is the atlas from Part 2, not SDL_ttf. Audio is the tiny mixer, not SDL_mixer. SDL_ttf is named in Part 2 so readers know the alternative.
 
 ## Open questions
 
 - Host: the code for each part as a tag in a small public repo, or as gists?
-- Include the saucer in Part 11, or leave it as an "exercise" post?
+- Include the saucer in Part 12, or leave it as an "exercise" post?

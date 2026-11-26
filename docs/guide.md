@@ -829,7 +829,7 @@ Tip: `GUIDE_FRAMES=120 ./quad` quits after 120 frames, which is handy for CI smo
 
 ## 11. What's next: building Asteroids
 
-This guide is Part 0 of a series. Next we'll build a complete **classic vector Asteroids** on this exact setup: a line-list ship, thrust and screen wrap, bullets, splitting rocks, collisions, score/lives/UI, and audio through SDL3's core audio streams with a tiny custom mixer (no SDL_mixer). See [`series-outline.md`](series-outline.md) for the part-by-part plan.
+This guide is Part 1 of a series. Part 2 draws text next: a glyph is just the textured quad you already have, it is fun to see your own words early, and score, lives, and a debug overlay will reuse it. After that we'll build a complete **classic vector Asteroids** on this exact setup: a line-list ship, thrust and screen wrap, bullets, splitting rocks, collisions, score/lives/UI, and audio through SDL3's core audio streams with a tiny custom mixer (no SDL_mixer). See [`series-outline.md`](series-outline.md) for the part-by-part plan.
 
 ---
 

@@ -35,22 +35,22 @@ Linux needs the usual X11/Wayland and Vulkan headers before SDL will configure. 
 
 ## What's next
 
-Part 0 is this quad. The follow-up is a classic vector Asteroids game on the same setup: line-list drawing, a fixed timestep, rocks that split, a whole part on drawing text (fonts are the hard bit), and sound through SDL3's own audio streams. Every later part is **planned**. They will be released gradually, one part at a time. There are no dates.
+Part 1 is this quad. Part 2 draws text next: a glyph is just that quad, it is satisfying to see your own words early, and score, lives, and a debug overlay all reuse it. After that, a classic vector Asteroids game on the same setup: a line-list ship, a fixed timestep, rocks that split, and sound through SDL3's own audio streams. Every later part is **planned**. They will be released gradually, one part at a time. There are no dates.
 
 | Part | Title | Status |
 | --- | --- | --- |
-| 0 | Window, device, pipeline, textured quad | this repo |
-| 1 | Vector ship as a line list | planned |
-| 2 | Fixed timestep, input, thrust, rotation, wrap | planned |
-| 3 | Dynamic vertex buffer | planned |
-| 4 | Bullets | planned |
-| 5 | Asteroids and splitting | planned |
-| 6 | Collisions | planned |
-| 7 | Text: a font atlas | planned |
-| 8 | Score, lives, waves, UI | planned |
-| 9 | Audio with core audio streams | planned |
-| 10 | Juice: debris, shake, glow | planned |
-| 11 | Polish and a shareable build | planned |
+| 1 | Window, device, pipeline, textured quad | this repo |
+| 2 | Text: a font atlas | planned |
+| 3 | Vector ship as a line list | planned |
+| 4 | Fixed timestep, input, thrust, rotation, wrap | planned |
+| 5 | Dynamic vertex buffer | planned |
+| 6 | Bullets | planned |
+| 7 | Asteroids and splitting | planned |
+| 8 | Collisions | planned |
+| 9 | Score, lives, waves, UI | planned |
+| 10 | Audio with core audio streams | planned |
+| 11 | Juice: debris, shake, glow | planned |
+| 12 | Polish and a shareable build | planned |
 
 The per-part notes are in the [series outline](docs/series-outline.md).
 
