@@ -17,7 +17,7 @@ This is the same path a real engine takes. Each section links to the matching fi
 
 ## 0. Setup: let an AI assistant do the plumbing (recommended)
 
-Build setup (CMake, fetching SDL3, compiling shaders) is the least interesting part of graphics programming, and it's exactly where beginners lose a weekend. Our advice: **let an AI coding assistant generate the project scaffolding, and spend your energy on the SDL GPU code.** An AI speeds up setup, but you should still read every line it writes. If you can't explain a line, ask the assistant what it does before you keep it.
+Build setup (CMake, fetching SDL3, compiling shaders) is the least interesting part of graphics programming, and it's exactly where beginners lose a weekend. Our advice: **let an AI coding assistant generate the project scaffolding, and spend your energy on the SDL GPU code.** A free tier of a common assistant is enough for this. You do not need a paid plan. An AI speeds up setup, but you should still read every line it writes. If you can't explain a line, ask the assistant what it does before you keep it.
 
 This repository already contains a working setup (`CMakeLists.txt`, `CMakePresets.json`, and precompiled shaders). You can build it from the [README](../README.md), or paste the prompts below into an assistant and recreate it yourself. Either way, run the checklist before you trust the project.
 

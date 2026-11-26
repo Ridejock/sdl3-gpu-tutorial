@@ -4,7 +4,7 @@ A small C++20 tutorial: open a window, create an SDL GPU device, and draw a spin
 
 ![The finished sample: a spinning 8x8 checkerboard quad](docs/images/screenshot-lavapipe.png)
 
-**New here?** Let an AI assistant do the build setup, then check its work against a short list. The [guide](docs/guide.md) has paste-ready prompts and that checklist. Hand-written CMake is an appendix, for when you want to see what the assistant did.
+**New here?** Let an AI assistant do the build setup, then check its work against a short list. A free tier of a common assistant is enough. You do not need a paid plan. The [guide](docs/guide.md) has paste-ready prompts and that checklist. Hand-written CMake is an appendix, for when you want to see what the assistant did.
 
 **Stay current.** Assistants often suggest an old SDL tag, SDL2 packages, or stale CMake. Before you build, paste: `Check that this project uses the latest stable SDL3 release and current CMake setup; update anything outdated before building.` Ask it to confirm SDL_shadercross, the CMake minimum, and the install steps as well.
 
