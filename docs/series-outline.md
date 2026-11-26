@@ -32,12 +32,28 @@ Score and lives are the first thing in the game that needs words, and fonts are 
 
 This is a fun retro approach, not the modern standard. Try it if you want a font that is entirely yours, with no font file and no license to track. For the HUD, stick with stb_truetype and an atlas.
 
-Years ago the author would take graph paper to a coffee shop, map a font pixel by pixel, and pack each row of pixels into bits for OpenGL's `glBitmap`. The same idea still works, and the draw at the end is the one you already know:
+Years ago the author would take graph paper to a coffee shop, map a font pixel by pixel, and pack each row of pixels into bits for OpenGL's `glBitmap`. He wrote those rows in hex, the way the OpenGL Red Book does. The same idea still works, and the draw at the end is the one you already know:
 
-1. Draw an 8×8 glyph on graph paper (5×7 works too). A filled square is a 1, an empty square is a 0.
-2. Encode each row as one byte. A glyph is a `const uint8_t` array, eight bytes for an 8×8 character.
+1. Draw an 8×8 glyph on graph paper (5×7 works too). A filled square is a 1, an empty square is a 0. The leftmost square is the high bit.
+2. Write each row as one hex byte, with the bits in a comment so you can check the row against the paper. A glyph is a `const uint8_t` array, eight bytes for an 8×8 character.
 3. At startup, walk those bits and expand them into an R8 or RGBA atlas. A 1 becomes an opaque texel, and a 0 stays transparent.
 4. Upload that atlas and draw it with the same glyph-quad path as the TTF atlas.
+
+An 8×8 "A", in the same hex style. Read each comment left to right and it is the graph-paper row:
+
+```cpp
+// 8x8 "A". Leftmost square is bit 7.
+constexpr uint8_t kGlyphA[8] = {
+    0x3C, // 0b00111100
+    0x66, // 0b01100110
+    0xC3, // 0b11000011
+    0xC3, // 0b11000011
+    0xFF, // 0b11111111
+    0xC3, // 0b11000011
+    0xC3, // 0b11000011
+    0x00, // 0b00000000
+};
+```
 
 The pixels are original, so the font is license-free.
 
