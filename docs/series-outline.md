@@ -16,7 +16,7 @@ Each part ends with a runnable build, a short "what changed" diff, and a 1-post 
 | 4 | **Bullets** | Fixed-size pool (`std::array` + alive flags), lifetime, fire cooldown, wrap | Ship shoots |
 | 5 | **Asteroids + splitting** | Data table for sizes (large → 2 medium → 2 small: radius, speed, score), seeded RNG (`std::mt19937`), jagged polygons generated once per rock | Rocks drift and split when hit |
 | 6 | **Collisions** | Circle-vs-circle broad checks, wrap-aware distance, ship death + respawn invulnerability blink | Bullets break rocks; rocks kill the ship |
-| 7 | **Text: a font atlas** | Bake glyphs with stb_truetype or a bitmap font, upload one atlas, draw glyph quads with alpha blend and pixel snapping. See below. | The words "SCORE" and a life count, crisp on the HUD |
+| 7 | **Text: a font atlas** | Recommended: bake glyphs with stb_truetype. Optional old-school path: a hand-drawn bitmap font. Upload one atlas, draw glyph quads with alpha blend and pixel snapping. See below. | The words "SCORE" and a life count, crisp on the HUD |
 | 8 | **Score, lives, waves, UI** | Game state machine (title / playing / game over), wave spawner, HUD strings drawn with the Part 7 atlas | HUD, waves, title + game over screens |
 | 9 | **Audio: core audio streams + tiny mixer** | `SDL_OpenAudioDeviceStream`, a callback that mixes N voices (float, clamp), procedurally generated SFX (thrust noise, fire blip, explosion), **no SDL_mixer** | Classic beeps and booms |
 | 10 | **Juice** | Particle debris as lines, screen shake (camera offset uniform), additive blend glow pipeline | It *feels* like Asteroids |
@@ -26,12 +26,22 @@ Each part ends with a runnable build, a short "what changed" diff, and a 1-post 
 
 Score and lives are the first thing in the game that needs words, and fonts are where a lot of beginners get stuck. This part is only about drawing text. Part 8 uses it for the HUD, the title, and game over. Nothing here is a new kind of draw. A glyph is the same textured quad as Part 0.
 
-**Where the glyphs come from.** Two fine choices:
+**Where the glyphs come from.** The recommended path is [stb_truetype](https://github.com/nothings/stb/blob/master/stb_truetype.h), one public-domain header. You hand it an OFL or CC0 TTF, and it rasterizes the characters you ask for. That is the modern standard for this series, and it is the path Part 8 builds on.
 
-- [stb_truetype](https://github.com/nothings/stb/blob/master/stb_truetype.h) is one public-domain header. You hand it a TTF, and it rasterizes the characters you ask for.
-- A bitmap font is a picture of the alphabet plus a small table of widths. You can draw it yourself. There is no font parser at all.
+### Old-school option: hand-drawn bitmap font
 
-Either way, bake the characters you need into **one texture atlas** (a single image of glyphs). Keep a tiny table next to it: for each character, the rectangle inside the atlas, how far the next character should start (the advance), and where the glyph sits relative to the baseline (the bearing).
+This is a fun retro approach, not the modern standard. Try it if you want a font that is entirely yours, with no font file and no license to track. For the HUD, stick with stb_truetype and an atlas.
+
+Years ago the author would take graph paper to a coffee shop, map a font pixel by pixel, and pack each row of pixels into bits for OpenGL's `glBitmap`. The same idea still works, and the draw at the end is the one you already know:
+
+1. Draw an 8×8 glyph on graph paper (5×7 works too). A filled square is a 1, an empty square is a 0.
+2. Encode each row as one byte. A glyph is a `const uint8_t` array, eight bytes for an 8×8 character.
+3. At startup, walk those bits and expand them into an R8 or RGBA atlas. A 1 becomes an opaque texel, and a 0 stays transparent.
+4. Upload that atlas and draw it with the same glyph-quad path as the TTF atlas.
+
+The pixels are original, so the font is license-free.
+
+Bake whichever source you picked into **one texture atlas** (a single image of glyphs). Keep a tiny table next to it: for each character, the rectangle inside the atlas, how far the next character should start (the advance), and where the glyph sits relative to the baseline (the bearing).
 
 **Onto the GPU.** Upload that atlas the same way as the checkerboard: CPU pixels, a transfer buffer, a copy pass, a GPU texture. Then draw one textured quad per glyph with the pipeline you already have. A string is a row of those quads.
 
@@ -43,7 +53,7 @@ Either way, bake the characters you need into **one texture atlas** (a single im
 
 **SDL_ttf is a real option, and we don't use it here.** SDL_ttf will rasterize for you, and it is a good library. The atlas is a few dozen lines on top of the upload and the draw you already know, it links nothing extra, and you can see every byte that reaches the GPU. Once that path is obvious, SDL_ttf is easy to pick up. The sample stays on SDL3 core.
 
-**Fonts you can ship.** Only use a font you are allowed to redistribute. That means an [OFL](https://openfontlicense.org/) font (SIL Open Font License) or a CC0 font, with its license file kept next to the font. Don't drop in a font from the operating system, and don't use a commercial face.
+**Fonts you can ship.** A TTF has to be one you are allowed to redistribute: an [OFL](https://openfontlicense.org/) font (SIL Open Font License) or a CC0 font, with its license file kept next to the font. Don't drop in a font from the operating system, and don't use a commercial face. The hand-drawn bitmap font above is original pixels, so it is license-free.
 
 ## Running rules for the series
 
