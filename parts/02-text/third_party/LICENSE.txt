@@ -1,0 +1,9 @@
+stb_truetype.h version 1.28, by Sean Barrett and contributors.
+
+The header in this directory is the upstream file, pinned to commit
+6b5799bae8a1fe3792691ef4b72ae26434c3e799 of https://github.com/nothings/stb
+
+That file is dual-licensed. You may use it under either the MIT license
+or the Unlicense (public domain). The full text of both is at the bottom
+of stb_truetype.h. This sample ships the header under that upstream choice
+and does not relicense it.

@@ -75,3 +75,4 @@ jobs:
           export VK_DRIVER_FILES="$icd"
           export GUIDE_FRAMES=3
           xvfb-run -a -s "-screen 0 1280x720x24" ./out/release/quad
+          xvfb-run -a -s "-screen 0 1280x720x24" ./out/release/text

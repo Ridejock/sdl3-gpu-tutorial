@@ -27,6 +27,8 @@ Each part ends with a runnable build, a short "what changed" diff, and a 1-post 
 
 ## Part 2: drawing text
 
+The code is [`parts/02-text/`](../parts/02-text/) and the step-by-step walkthrough is [part-02-text.md](part-02-text.md).
+
 A glyph is just a textured quad, the same one from Part 1. Beginners love seeing their own text early, and every later part reuses this: score, lives, and a debug overlay. This part is only about drawing text.
 
 **Where the glyphs come from.** The recommended path is [stb_truetype](https://github.com/nothings/stb/blob/master/stb_truetype.h), one public-domain header. You hand it an OFL or CC0 TTF, and it rasterizes the characters you ask for. That is the modern standard for this series, and it is what Part 11 and the later HUD text build on.
@@ -126,6 +128,7 @@ Gamepad support uses SDL3's gamepad API. `SDL_GetGamepads` and `SDL_OpenGamepad`
 - One pipeline per primitive and blend combo. Few draws, big buffers.
 - Every API name is checked against wiki.libsdl.org/SDL3 before publishing.
 - Every part compiles with warnings on and runs on Vulkan, D3D12, and Metal (shaders via shadercross).
+- Each part's guide is nearly step by step. Numbered steps, one small code change each, with the exact snippet and where it goes, a plain explanation, and a "Build and run: you should see..." checkpoint. Steps where beginners commonly get stuck include a short "If it doesn't work" tip.
 - No SDL satellite libraries in the sample (no SDL_mixer, SDL_image, or SDL_ttf). Text is the atlas from Part 2, not SDL_ttf. Audio is the tiny mixer, not SDL_mixer. SDL_ttf is named in Part 2 so readers know the alternative.
 
 ## Open questions
